@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel table to XSD</title>
+    <style>
+        .table {
+            border: 1px solid;
+        }
+
+        tr {
+            border: 1px solid;
+        }
+
+        td {
+            border: 1px solid;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <div>
+            <textarea class="ta" rows="10" cols="45"></textarea>
+        </div>
+        <div>
+            <div>
+                <button onclick="generateXML()">Generate</button>
+            </div>
+            <div>
+                <textarea class="ta2" rows="30" cols="70"></textarea>
+            </div>
+        </div>
+    </div>
+    <script>
+        function generateXML() {
+            let txt = document.querySelector(".ta").value;
+            const myArray = txt.split("\n");
+            let res = [];
+            let j = 0;
+            for (let e of myArray) {
+                if (e.length > 0) {
+                    let i = 0;
+                    let tmp = [];
+                    const myArray2 = e.split("	");
+                    for (let e2 of myArray2) {
+                        tmp[i] = e2;
+                        i++;
+                    }
+                    res[j] = tmp;
+                    j++;
+                }
+            }
+
+            let res2 = "";
+            for (let e3 of res) {
+                if (e3[1].toLowerCase().includes("int") || e3[1].toLowerCase().includes("decimal") || 
+                e3[1].toLowerCase().includes("double") || e3[1].toLowerCase().includes("short") || 
+                e3[1].toLowerCase().includes("float") || e3[1].toLowerCase().includes("long")) {
+                    res2 = res2 + "<xs:element name=\"" + replText(e3[0]) + "\">\n" +
+                        "	<xs:simpleType>\n" +
+                        "		<xs:restriction base=\"xs:" + replText(e3[1]).toLowerCase() + "\">\n" +
+                        "			<xs:totalDigits value=\"" + getNum(e3[2]) + "\"/>\n" +
+                        "		</xs:restriction>\n" +
+                        "	</xs:simpleType>\n" +
+                        "</xs:element>\n";
+                } else {
+                    res2 = res2 + "<xs:element name=\"" + replText(e3[0]) + "\">\n" +
+                        "	<xs:simpleType>\n" +
+                        "		<xs:restriction base=\"xs:" + replText(e3[1]).toLowerCase() + "\">\n" +
+                        "			<xs:length value=\"" + getNum(e3[2]) + "\"/>\n" +
+                        "		</xs:restriction>\n" +
+                        "	</xs:simpleType>\n" +
+                        "</xs:element>\n";
+                }
+            }
+            
+            document.querySelector(".ta2").value = res2;
+        }
+
+        function replText(v){
+            return v.replaceAll(" ", "_").
+                    replaceAll("'", "").
+                    replaceAll("\"", "");
+        }
+        function getNum(v){
+            const myArray = v.split("");
+            let tmp = "0123456789";
+            let res = "";
+            for(let e of myArray){
+                console.log(e);
+                if (tmp.includes(e)) {
+                    res = res + e;
+                }
+            }
+            return res;
+        }
+    </script>
+</body>
+
+</html>
